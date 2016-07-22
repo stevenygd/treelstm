@@ -74,7 +74,7 @@ emb_vecs = nil
 collectgarbage()
 
 -- load datasets
-print('loading testing')
+printf('loading testing : %s\n', (data_dir .. args.data))
 local test_dir = data_dir .. args.data
 local constituency = (args.model == 'constituency')
 local test_dataset = treelstm.read_relatedness_dataset(test_dir, vocab, constituency)

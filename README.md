@@ -85,3 +85,24 @@ th sentiment/main.lua -m constituency -b
 Predictions are written to the `predictions` directory and trained model parameters are saved to the `trained_models` directory.
 
 See the [paper](http://arxiv.org/abs/1503.00075) for more details on these experiments.
+
+### Evaluation
+The following scripts helps to run the evaluation from a pickled fild that stored the two texts to be compared, calculated the scores according to the treelstm model, and then reattach the scores back to the pickled file.
+```
+./run.sh <logfile_name> <outfile_name> <field_name>
+```
+
+<lodfile_name> is the absolute path toward the pickled file. The pickled file should have to following format:
+```javascript
+{
+    '<coco image id>' : {
+        'orig' : <text 1 to be compared>,
+        'ablt' : <text 2 to be compared>
+        // more fields could goes here
+    }
+    // more
+}
+```
+
+<outfile_name> is the name for the output file.
+<field_name>   is the name for the field in the dictionary when we reattach the score to.

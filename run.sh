@@ -16,14 +16,13 @@ echo "OUT_FILE_NATM = $OUT_FILE_NAME"
 echo "FIELD_NAME    = $FIELD_NAME"
 
 # Preprocessing
-# python scripts/preprocess-sick.py --logfile ../textmatters/stats/rel_text/median.pkl
-echo "Start preprocessing..."
-python scripts/preprocess-sick.py --logfile $LOG_FILE_PATH 
+echo "Start preprocessing..." && \
+python scripts/preprocess-sick.py --logfile $LOG_FILE_PATH --tmpfile "tmp_${OUT_FILE_NAME}" && \
 
 # Evaluation
-echo "Start evaluating..."
-th relatedness/eval.lua trained_models/rel-dependency.1l.150d.2.th -o $OUT_FILE_NAME 
+echo "Start evaluating..." && \
+th relatedness/eval.lua trained_models/rel-dependency.1l.150d.2.th -d tmp_$OUT_FILE_NAME/ -o $OUT_FILE_NAME  && \
 
 # Postprocess, re-added into the previous data dictionary
-echo "Start post-processing..."
-python util.py reattach --logfile $LOG_FILE_PATH --scorefile predictions/$OUT_FILE_NAME --fieldname $FIELD_NAME
+echo "Start post-processing..." && \
+python scripts/util.py reattach --logfile $LOG_FILE_PATH --scorefile predictions/$OUT_FILE_NAME --fieldname $FIELD_NAME

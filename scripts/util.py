@@ -1,7 +1,18 @@
 import os
-import argparse
 import csv
+import sys
+import argparse
 from   six.moves import cPickle as pkl
+
+def print_progress_bar(idx, total):
+    done = "=" * int(float(idx - 1)/float(total) * 50)
+    todo = "." * int(float(total - idx) / float(total) * 50)
+    perc = int(float(idx) / float(total) * 100)
+    sys.stdout.write("\r[%s>%s] %f%s" % (done, todo, perc, '%'))
+    sys.stdout.flush()
+    if idx == total :
+        sys.stdout.write('\n')
+        sys.stdout.flush()
 
 def make_sicklike_data(filename, data):
     """
@@ -17,7 +28,7 @@ def make_sicklike_data(filename, data):
         idx = 1
         wr.writeheader()
         for sent1, sent2 in data:
-            print "Wring the %d-th data"%idx
+            print_progress_bar(idx, len(data))
             wr.writerow({
                 "pair_ID"             : idx,
                 "sentence_A"          : sent1,
@@ -46,8 +57,10 @@ def reattach_scores_to_data(datafile, scorefile, fieldname=None):
     imgids = [ k for k, v in logs.iteritems() if isinstance(v, dict) ]
     scores = [ float(x) for x in open(scorefile) ]
     dscore = zip(imgids, scores)
+    count = 0
     for img_id, s in dscore:
-        print("Image id: %s, score : %f"%(str(img_id), s))
+        count += 1
+        print_progress_bar(count, len(dscore))
         logs[img_id].update({fieldname : s})
     pkl.dump(logs, open(datafile, 'w+'))
 

@@ -87,11 +87,12 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Preprocess sick dataset.')
     parser.add_argument('--logfile', type=str, help="Log file name if want to process the log file.")
+    parser.add_argument('--tmpfile', type=str, help="Folder name for temporary holding the data.")
     args = parser.parse_args()
     if args.logfile:
         from util import make_data_from_logfile
         sicklike_file = make_data_from_logfile(args.logfile, dformat='sick')
-        tmp_dir       = os.path.join(sick_dir, 'tmp')
+        tmp_dir       = os.path.join(sick_dir, 'tmp' if args.tmpfile is None else args.tmpfile)
         if not os.path.exists(tmp_dir):
             os.makedirs(tmp_dir)
 
