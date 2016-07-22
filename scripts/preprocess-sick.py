@@ -2,7 +2,8 @@
 Preprocessing script for SICK data.
 
 """
-
+import shutil
+import argparse
 import os
 import glob
 
@@ -66,10 +67,9 @@ def parse(dirpath, cp=''):
     constituency_parse(os.path.join(dirpath, 'b.txt'), cp=cp, tokenize=True)
 
 if __name__ == '__main__':
-    print('=' * 80)
-    print('Preprocessing SICK dataset')
-    print('=' * 80)
-
+    """
+    Add arguments to preprocess other datasets if needed
+    """
     base_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     data_dir = os.path.join(base_dir, 'data')
     sick_dir = os.path.join(data_dir, 'sick')
@@ -85,21 +85,48 @@ if __name__ == '__main__':
         os.path.join(lib_dir, 'stanford-parser/stanford-parser.jar'),
         os.path.join(lib_dir, 'stanford-parser/stanford-parser-3.5.1-models.jar')])
 
-    # split into separate files
-    split(os.path.join(sick_dir, 'SICK_train.txt'), train_dir)
-    split(os.path.join(sick_dir, 'SICK_trial.txt'), dev_dir)
-    split(os.path.join(sick_dir, 'SICK_test_annotated.txt'), test_dir)
+    parser = argparse.ArgumentParser(description='Preprocess sick dataset.')
+    parser.add_argument('--logfile', type=str, help="Log file name if want to process the log file.")
+    args = parser.parse_args()
+    if args.logfile:
+        from util import make_data_from_logfile
+        sicklike_file = make_data_from_logfile(args.logfile, dformat='sick')
+        tmp_dir       = os.path.join(sick_dir, 'tmp')
+        if not os.path.exists(tmp_dir):
+            os.makedirs(tmp_dir)
 
-    # parse sentences
-    parse(train_dir, cp=classpath)
-    parse(dev_dir, cp=classpath)
-    parse(test_dir, cp=classpath)
+        print('Data will be splitted into %s' % tmp_dir)
+        split(sicklike_file, tmp_dir)
+        parse(tmp_dir, cp=classpath)
 
-    # get vocabulary
-    build_vocab(
-        glob.glob(os.path.join(sick_dir, '*/*.toks')),
-        os.path.join(sick_dir, 'vocab.txt'))
-    build_vocab(
-        glob.glob(os.path.join(sick_dir, '*/*.toks')),
-        os.path.join(sick_dir, 'vocab-cased.txt'),
-        lowercase=False)
+        # get vocabulary
+        build_vocab(
+                glob.glob(os.path.join(tmp_dir, '*.toks')),
+                os.path.join(sick_dir, 'vocab.txt'))
+        build_vocab(
+                glob.glob(os.path.join(tmp_dir, '*.toks')),
+                os.path.join(sick_dir, 'vocab-cased.txt'),
+                lowercase=False)
+    else:
+        print('=' * 80)
+        print('Preprocessing SICK dataset')
+        print('=' * 80)
+
+        # split into separate files
+        split(os.path.join(sick_dir, 'SICK_train.txt'), train_dir)
+        split(os.path.join(sick_dir, 'SICK_trial.txt'), dev_dir)
+        split(os.path.join(sick_dir, 'SICK_test_annotated.txt'), test_dir)
+
+        # parse sentences
+        parse(train_dir, cp=classpath)
+        parse(dev_dir, cp=classpath)
+        parse(test_dir, cp=classpath)
+
+        # get vocabulary
+        build_vocab(
+                glob.glob(os.path.join(sick_dir, '*/*.toks')),
+                os.path.join(sick_dir, 'vocab.txt'))
+        build_vocab(
+                glob.glob(os.path.join(sick_dir, '*/*.toks')),
+                os.path.join(sick_dir, 'vocab-cased.txt'),
+                lowercase=False)

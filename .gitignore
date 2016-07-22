@@ -7,4 +7,4 @@ trained_models
 *.class
 lib/stanford-parser
 lib/stanford-tagger
-
+*.pyc
